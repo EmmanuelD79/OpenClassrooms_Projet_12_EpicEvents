@@ -15,7 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from authentication.admin import crm_site
+
 
 urlpatterns = [
+    path('crm/', crm_site.urls),
+    path('api/', include('authentication.urls')),
+    path('api/', include('clients.urls')),
+    path('api/', include('contracts.urls')),
+    path('api/', include('events.urls')),
     path('admin/', admin.site.urls),
 ]
