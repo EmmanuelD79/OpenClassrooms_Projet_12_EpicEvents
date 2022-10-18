@@ -27,7 +27,7 @@ Créer un CRM avec une interface web et une API:
 
 ## **Documentation**:
 
-La documentation de l'API est accessible à l'adresse : `https://documenter.getpostman.com/view/23145404/2s847HNXSB`
+La documentation de l'API est accessible à l'adresse : https://documenter.getpostman.com/view/23145404/2s847HNXSB
 
 Vous y trouverez la définition de chaque endpoint avec les données à fournir et les réponses attendues.
 
@@ -115,7 +115,7 @@ python manage.py runserver
 ```
 
 
-L'application web est disponible en local à l'adresse:  http://localhost:8000/
+L'application web est disponible en local à l'adresse:  http://localhost:8000/crm/
 
 Pour utiliser l'API:
 ```
