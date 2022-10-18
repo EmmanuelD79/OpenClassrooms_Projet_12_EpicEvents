@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-
+from permissions.permissions import HasGroupPerms
 from .models import Contract
 from .serializers import ContractSerializer
 
@@ -18,10 +18,10 @@ class ContratViewset(viewsets.ViewSet):
         return obj
 
     def get_permissions(self):
-        if self.action in ['create', 'retrieve', 'destroy', 'update']:
-            self.permission_classes = [IsAuthenticated]
-        elif self.action in ['list']:
-            self.permission_classes = [IsAuthenticated]
+        if self.action in ['create', 'list', 'destroy', 'update', 'retrieve']:
+            self.permission_classes = [HasGroupPerms]
+        else:
+            self.permission_classes = [IsAdminUser]
         return super().get_permissions()
     
     def get_queryset(self):
@@ -40,12 +40,9 @@ class ContratViewset(viewsets.ViewSet):
     def create(self, request):
         serializer = ContractSerializer(data=request.data)
         if serializer.is_valid():
-            self.perform_create(serializer)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def perform_create(self, serializer):
-        serializer.save(sales_contact_id=self.request.user)
         
     def update(self, request, pk=None):
         client = self.get_object()

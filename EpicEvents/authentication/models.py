@@ -1,6 +1,6 @@
 from tabnanny import verbose
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Permission, GroupManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.core.validators import RegexValidator
 
 
@@ -10,17 +10,23 @@ class UserManager(BaseUserManager):
 
     def _create_user(self, email, password, **extra_fields):
         """Create and save a User with the given email and password."""
+        group = None
         if not email:
             raise ValueError('The given email must be set')
         email = self.normalize_email(email)
+        if 'group' in extra_fields.keys():
+            group = extra_fields.get('group')
+            extra_fields.pop('group')
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
+        if group is not None:
+            group.user_set.add(user.id)
         return user
 
     def create_user(self, email, password=None, **extra_fields):
         """Create and save a regular User with the given email and password."""
-        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', False)
         return self._create_user(email, password, **extra_fields)
 
@@ -33,8 +39,11 @@ class UserManager(BaseUserManager):
         except:
             group = Group.objects.create(name='Management')
             group.save()
+            all_permission = Permission.objects.all()
+            group.permissions.set(all_permission)
         
-        extra_fields.setdefault('group_name', group)
+        extra_fields.setdefault('group', group)
+        
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
@@ -42,20 +51,6 @@ class UserManager(BaseUserManager):
 
         return self._create_user(email, password, **extra_fields)
 
-
-class Group(models.Model):
-    
-    name = models.CharField("Service", max_length=30, primary_key=True)
-    permissions = models.ManyToManyField(Permission, verbose_name="autorisation", related_name="authorization")
-
-    objects = GroupManager()
-
-    class Meta:
-        verbose_name="Groupe"
-        verbose_name_plural = "Groupes"
-    
-    def __str__(self):
-        return f"{self.name}"
 
 class Employee(AbstractBaseUser, PermissionsMixin):
     
@@ -74,7 +69,6 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     )
     date_created = models.DateTimeField("Crée le", auto_now_add=True)
     date_updated = models.DateTimeField("Mise à jour le", auto_now=True)
-    group_name = models.ForeignKey(Group, on_delete=models.PROTECT, verbose_name="Groupe")
     is_staff = models.BooleanField()
     is_superuser = models.BooleanField()
     
@@ -88,5 +82,5 @@ class Employee(AbstractBaseUser, PermissionsMixin):
         verbose_name="Salariée"
     
     def __str__(self):
-        return f"{self.first_name} {self.last_name} | {self.email} | {self.group_name}"
+        return f"{self.first_name} {self.last_name} | {self.email}"
     

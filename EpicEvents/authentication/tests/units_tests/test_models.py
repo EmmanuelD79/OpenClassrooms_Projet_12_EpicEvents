@@ -31,13 +31,12 @@ class TestEmployee:
                     phone = "0102030405",
                     mobile = "0601020304",
                     password = "S3cr3tW0rd",
-                    group_name = group
                 )
 
-        expected_value = "Pierre Jean | pierre.jean@gmail.com | Sales"
+        expected_value = "Pierre Jean | pierre.jean@gmail.com"
         assert str(employee) == expected_value
         assert employee.check_password("S3cr3tW0rd") == True
-        assert employee.is_staff == False
+        assert employee.is_staff == True
         assert employee.is_superuser == False
         
     def test_should_create_superuser_employee_model(self):
@@ -50,7 +49,7 @@ class TestEmployee:
                     password = "S3cr3tW0rd",
                 )
 
-        expected_value = "Pierre Jean | pierre.jean@gmail.com | Management"
+        expected_value = "Pierre Jean | pierre.jean@gmail.com"
         assert str(employee) == expected_value
         assert employee.check_password("S3cr3tW0rd") == True
         assert employee.is_staff == True
@@ -65,7 +64,7 @@ class TestEmployee:
                     phone = "0102030405",
                     mobile = "0601020304",
                     password = "S3cr3tW0rd",
-                    group_name = group
+
                 )
         employee2 = Employee.objects.create_user(
                     first_name = "Paul",
@@ -74,7 +73,7 @@ class TestEmployee:
                     phone = "0506070809",
                     mobile = "0605060708",
                     password = "S3cr3tW0rd",
-                    group_name = group
+
                 )
 
         assert Employee.objects.count() == 2

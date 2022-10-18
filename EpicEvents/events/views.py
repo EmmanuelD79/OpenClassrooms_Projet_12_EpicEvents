@@ -2,10 +2,10 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-
+from rest_framework.permissions import IsAdminUser
+from permissions.permissions import HasGroupPerms
 from .models import Event
-from .serializers import EventSerializer
+from .serializers import EventSerializer, EventUpdateSerializer
 
 
 class EventViewset(viewsets.ViewSet):
@@ -13,15 +13,15 @@ class EventViewset(viewsets.ViewSet):
     serializer_class = EventSerializer
 
     def get_object(self):
-        obj = get_object_or_404(Event.objects.all(), id=self.kwargs["pk"])
+        obj = get_object_or_404(Event.objects.all(), contract_id=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
 
     def get_permissions(self):
-        if self.action in ['create', 'retrieve', 'destroy', 'update']:
-            self.permission_classes = [IsAuthenticated]
-        elif self.action in ['list']:
-            self.permission_classes = [IsAuthenticated]
+        if self.action in ['create', 'list', 'destroy', 'update', 'retrieve']:
+            self.permission_classes = [HasGroupPerms]
+        else:
+            self.permission_classes = [IsAdminUser]
         return super().get_permissions()
     
     def get_queryset(self):
@@ -48,8 +48,8 @@ class EventViewset(viewsets.ViewSet):
         serializer.save(support_contact_id=self.request.user)
         
     def update(self, request, pk=None):
-        client = self.get_object()
-        serializer = EventSerializer(client, data=request.data)
+        event = self.get_object()
+        serializer = EventUpdateSerializer(event, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

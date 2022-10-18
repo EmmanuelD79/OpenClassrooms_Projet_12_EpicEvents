@@ -27,7 +27,7 @@ Créer un CRM avec une interface web et une API:
 
 ## **Documentation**:
 
-La documentation de l'API est accessible à l'adresse : 
+La documentation de l'API est accessible à l'adresse : `https://documenter.getpostman.com/view/23145404/2s847HNXSB`
 
 Vous y trouverez la définition de chaque endpoint avec les données à fournir et les réponses attendues.
 

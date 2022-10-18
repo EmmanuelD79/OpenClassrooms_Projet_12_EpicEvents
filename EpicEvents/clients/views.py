@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from permissions.permissions import HasGroupPerms
 
 from .models import Client, ClientStatus
 from .serializers import ClientSerializer
@@ -18,10 +19,10 @@ class ClientViewset(viewsets.ViewSet):
         return obj
 
     def get_permissions(self):
-        if self.action in ['create''retrieve', 'destroy', 'update']:
-            self.permission_classes = [IsAuthenticated]
-        elif self.action in ['list']:
-            self.permission_classes = []
+        if self.action in ['create', 'list', 'destroy', 'update', 'retrieve']:
+            self.permission_classes = [HasGroupPerms]
+        else:
+            self.permission_classes = [IsAdminUser]
         return super().get_permissions()
     
     def get_queryset(self):

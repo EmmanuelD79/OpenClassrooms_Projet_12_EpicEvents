@@ -1,38 +1,10 @@
 from django.contrib import admin
 from .models import Client, ClientStatus
+from authentication.models import Employee
 from authentication.admin import crm_site
+from django.contrib.auth.models import Group, Permission
 from django.contrib import messages
 
-
-class CLientStatusAdmin(admin.ModelAdmin):
-    def has_delete_permission(self, request, obj=None):
-
-        if obj != None and request.POST.get('action') =='delete_selected':
-            messages.add_message(request, messages.ERROR,(
-                f"Merci de confirmer la suppression {obj}"
-            ))
-
-        if request.user.is_staff:
-            return True
-        return True
-
-    def has_add_permission(self, request):
-        
-        if request.user.is_staff:
-            return True
-        return True
-
-    def has_change_permission(self, request, obj=None):
-        
-        if request.user.is_staff:
-            return True
-        return True
-
-    def has_view_permission(self, request, obj=None):
-        
-        if request.user.is_staff:
-            return True
-        return True
 
 class ClientAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -50,34 +22,17 @@ class ClientAdmin(admin.ModelAdmin):
     def full_name(obj):
         return f"{obj.last_name.upper()}  {obj.first_name.capitalize()}"
     
-    def has_delete_permission(self, request, obj=None):
-
-        if obj != None and request.POST.get('action') =='delete_selected':
-            messages.add_message(request, messages.ERROR,(
-                f"Merci de confirmer la suppression {obj}"
-            ))
-
-        return True
-
-    def has_add_permission(self, request):
-        
-        if request.user.is_staff:
-            return True
-        return True
-
-    def has_change_permission(self, request, obj=None):
-        
-        if request.user.is_staff:
-            return True
-        return True
-
-    def has_view_permission(self, request, obj=None):
-        
-        if request.user.is_staff:
-            return True
-        return True
-   
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "sales_contact_id":
+            try:
+                permission = Permission.objects.get(codename="add_client")
+                groups_lst= Group.objects.filter(permissions=permission.pk).values_list('id', flat=True)
+                kwargs["queryset"] = Employee.objects.filter(groups__id__in=groups_lst)
+            except:
+                kwargs["queryset"] = Employee.objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
-crm_site.register(ClientStatus, CLientStatusAdmin)
+    
+crm_site.register(ClientStatus)
 crm_site.register(Client, ClientAdmin)
 

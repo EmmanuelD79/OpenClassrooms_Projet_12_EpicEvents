@@ -2,88 +2,56 @@ from django.contrib import admin
 from .models import Event, EventStatus
 from authentication.admin import crm_site
 from django.contrib import messages
+from django.contrib.auth.models import Group, Permission
+from authentication.models import Employee
+from contracts.models import Contract
 
 
-class EventStatusAdmin(admin.ModelAdmin):
-    def has_delete_permission(self, request, obj=None):
-
-        if obj != None and request.POST.get('action') =='delete_selected':
-            messages.add_message(request, messages.ERROR,(
-                f"Merci de confirmer la suppression {obj}"
-            ))
-
-        return True
-
-    def has_add_permission(self, request):
-        
-        if request.user.is_superuser:
-            return False
-        
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        
-        if request.user.is_superuser:
-            return True
-        
-        return False
-
-    def has_view_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return False
-        
-        return False
 
 class EventAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Details Event',
-         {'fields': ('full_name', 'company_name', 'event_status')}),
+         {'fields': ('contract_id', 'event_status', 'notes')}),
         ('Info', {'fields': ('support_contact_id', 'event_date', 'attendees', 'date_created', 'date_updated')})
     )
     
-    readonly_fields = ('full_name', 'company_name', 'date_created', 'date_updated')
-    list_display = ('id', 'full_name', 'company_name', 'event_status')
-    list_filter = ('client_id__company_name', 'event_status', 'support_contact_id__email')
+    readonly_fields = ('date_created', 'date_updated')
+    list_display = ('contract_id', 'event_status')
+    list_filter = ('event_status', 'support_contact_id__email')
     search_fields = ['event_date', 'attendees']
 
     @staticmethod
     def full_name(obj):
-        return f"{obj.client_id.last_name.upper()}  {obj.client_id.irst_name.capitalize()}"
+        return f"{obj.contract_id.client_id.last_name.upper()}  {obj.contract_id.client_id.first_name.capitalize()}"
     
     @staticmethod
     def company_name(obj):
-        return f"{obj.client_id.company_name.upper()}"
+        return f"{obj.contract_id.client_id.company_name.upper()}"
     
-    def has_delete_permission(self, request, obj=None):
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "support_contact_id":
+            try:
+                permission = Permission.objects.get(codename="add_event")
+                groups_lst= Group.objects.filter(permissions=permission.pk).values_list('id', flat=True)
+                kwargs["queryset"] = Employee.objects.filter(groups__id__in=groups_lst)
+            except:
+                kwargs["queryset"] = Employee.objects.all()  
 
-        if obj != None and request.POST.get('action') =='delete_selected':
-            messages.add_message(request, messages.ERROR,(
-                f"Merci de confirmer la suppression {obj}"
-            ))
-
-        return True
-
-    def has_add_permission(self, request):
-        
-        if request.user.is_superuser:
-            return False
-        
-        return True
-
-    def has_change_permission(self, request, obj=None):
-        
-        if request.user.is_superuser:
-            return True
-        
-        return True
-
-    def has_view_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return False
-        
-        return True
-   
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
-crm_site.register(EventStatus, EventStatusAdmin)
+    def get_form(self, request, obj = None, ** kwargs):
+        form = super().get_form(request, obj = None, ** kwargs)
+        try:
+            form.base_fields["support_contact_id"].disabled = True
+        except KeyError:
+            pass
+        if request.user.is_superuser:
+            form.base_fields["support_contact_id"].disabled = False
+
+        return form
+    
+    
+    
+crm_site.register(EventStatus)
 crm_site.register(Event, EventAdmin)
 

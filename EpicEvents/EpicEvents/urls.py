@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from authentication.admin import crm_site
-
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path('crm/', crm_site.urls),
@@ -24,5 +24,8 @@ urlpatterns = [
     path('api/', include('clients.urls')),
     path('api/', include('contracts.urls')),
     path('api/', include('events.urls')),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
     path('admin/', admin.site.urls),
 ]

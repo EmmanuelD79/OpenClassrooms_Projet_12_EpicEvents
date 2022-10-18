@@ -1,14 +1,32 @@
+from asyncio import events
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from authentication.models import Employee, Group
+from django.contrib.auth.models import Group, Permission
+from authentication.models import Employee
 from clients.models import Client, ClientStatus
+from contracts.models import Contract
+from events.models import Event, EventStatus
+from datetime import date
+
 
 UserModel = get_user_model()
 
 GROUPS = [
-    { 'name' : 'Sales'},
-    { 'name' : 'Support'},
-    { 'name' : 'Management'}
+    { 'name' : 'Sales', 
+     'permissions': {
+         'client': ['add', 'change', 'delete', 'view'],
+         'contract': ['add', 'change', 'delete', 'view'],
+         'event': ['view']
+         }
+     },
+    { 'name' : 'Support', 
+     'permissions':{
+         'client': ['view'],
+         'contract': ['view'],
+         'event': ['add', 'change', 'delete', 'view']
+        }
+     },
+    { 'name' : 'Management', 'permissions': 'all'}
 ]
 
 EMPLOYEES = [
@@ -19,7 +37,7 @@ EMPLOYEES = [
         'phone': "0102030405",
         'mobile': "0601020304",
         'password': "S3cr3tW0rd",
-        'group_name': 'Sales',
+        'group': 'Sales'
     },
     {
         'first_name': "Paul",
@@ -28,7 +46,7 @@ EMPLOYEES = [
         'phone': "0506070809",
         'mobile': "0605060708",
         'password': "S3cr3tW0rd",
-        'group_name': 'Support',
+        'group': 'Support'
     }
 ]
 
@@ -65,6 +83,38 @@ CLIENTS = [
 
 ]
 
+CONTRACTS = [
+    {
+        'payment_due': date.today(),
+        'amount_float': 30000.40,
+        'client_id': "bill.Malone@gmail.com",
+        'name': 'Fête de la bière'
+    }
+]
+
+EVENTS_STATUS = [
+    {
+        'status': "En préparation"
+    },
+    {
+        'status': "En Cours"
+    },
+    {
+        'status': "Terminé"
+    }
+]
+
+EVENTS = [
+    {
+        'event_date': date.today(),
+        'attendees': 1500,
+        'contract_id': 'Fête de la bière' ,
+        'event_status': 'En préparation',
+        'support_contact_id': 'paul.jacques@gmail.com'
+    }
+]
+
+
 ADMIN_ID = 'admin@epic.com'
 ADMIN_PASSWORD = 'Azerty01'
 ADMIN_FIRST_NAME = 'Admin'
@@ -78,24 +128,42 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.MIGRATE_HEADING(self.help))
         
-        UserModel.objects.all().delete()
-        Group.objects.all().delete()
+        Event.objects.all().delete()
+        EventStatus.objects.all().delete()
+        Contract.objects.all().delete()
         Client.objects.all().delete()
         ClientStatus.objects.all().delete()
+        UserModel.objects.all().delete()
+        Group.objects.all().delete()
         
         for data_group in GROUPS:
-            Group.objects.create(name=data_group['name'])
-        
+            group_perms = []
+            group = Group.objects.create(name=data_group['name'])
+            if data_group['permissions'] == 'all':
+                all_permission = Permission.objects.all()
+                group.permissions.set(all_permission)
+            else:
+                for data_perm in data_group['permissions']:
+                    for data_auto in data_group['permissions'][data_perm]:
+                        try:
+                            perm_obj = Permission.objects.get(codename=f'{data_auto}_{data_perm}')
+                            group_perms.append(perm_obj.id)
+                        except:
+                            continue
+                group.permissions.set(group_perms)
+                
         for data_employee in EMPLOYEES:
-            Employee.objects.create_user(
+            employee = Employee.objects.create_user(
                     first_name = data_employee['first_name'],
                     last_name = data_employee['last_name'],
                     email = data_employee['email'],
                     phone = data_employee['phone'],
                     mobile = data_employee['mobile'],
                     password = data_employee['password'],
-                    group_name = Group.objects.get(pk=data_employee['group_name'])
                 )
+            employee_group = Group.objects.get(name=data_employee['group'])
+            employee_group.user_set.add(employee.id)
+            
             
         for data_client_status in CLIENT_STATUS:
             ClientStatus.objects.create(
@@ -114,6 +182,27 @@ class Command(BaseCommand):
                 status = ClientStatus.objects.get(status=data_client['status'])
             )
             
+        for data_contracts in CONTRACTS:
+            Contract.objects.create(
+                payment_due = data_contracts['payment_due'],
+                amount_float = data_contracts['amount_float'],
+                client_id = Client.objects.get(email=data_contracts['client_id']),
+                name = data_contracts['name'],
+            )
+        
+        for data_event_status in EVENTS_STATUS:
+            EventStatus.objects.create(
+                status = data_event_status['status']
+            )
+        
+        for data_event in EVENTS:
+            Event.objects.create(
+                event_date = data_event['event_date'],
+                attendees = data_event['attendees'],
+                contract_id = Contract.objects.get(name=data_event['contract_id']),
+                event_status = EventStatus.objects.get(status=data_event['event_status']),
+                support_contact_id = Employee.objects.get(email=data_event['support_contact_id'])
+            )
         
         UserModel.objects.create_superuser(
             email=ADMIN_ID,
