@@ -1,20 +1,29 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 
+from django_filters import rest_framework as filters
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser
+
 from permissions.permissions import HasGroupPerms
 
-from .models import Client, ClientStatus
+from .filters import ClientFilter
+from .models import Client
 from .serializers import ClientSerializer
 
 
-class ClientViewset(viewsets.ViewSet):
-    queryset = Client.objects.all()
+class ClientViewset(viewsets.ModelViewSet): 
+    __basic_fields = ('last_name', 'email')
+    queryset = Client.objects.all()    
     serializer_class = ClientSerializer
+    filter_backends = [filters.DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = ClientFilter
+    search_fields = __basic_fields
+    ordering_fields = __basic_fields
 
     def get_object(self):
-        obj = get_object_or_404(Client.objects.all(), id=self.kwargs["pk"])
+        obj = get_object_or_404(self.queryset, id=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -25,21 +34,8 @@ class ClientViewset(viewsets.ViewSet):
             self.permission_classes = [IsAdminUser]
         return super().get_permissions()
     
-    def get_queryset(self):
-        return Client.objects.all()
-    
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = ClientSerializer(queryset, many=True)
-        return Response(serializer.data)
-    
-    def retrieve(self, request, pk=None):
-        client = self.get_object()
-        serializer = ClientSerializer(client)
-        return Response(serializer.data)
-
     def create(self, request):
-        serializer = ClientSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -50,7 +46,7 @@ class ClientViewset(viewsets.ViewSet):
         
     def update(self, request, pk=None):
         client = self.get_object()
-        serializer = ClientSerializer(client, data=request.data)
+        serializer = self.serializer_class(client, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -60,3 +56,4 @@ class ClientViewset(viewsets.ViewSet):
         client = self.get_object()
         client.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    

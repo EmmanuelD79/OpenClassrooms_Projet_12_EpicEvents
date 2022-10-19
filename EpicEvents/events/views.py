@@ -1,17 +1,27 @@
 from django.shortcuts import get_object_or_404
 
+from django_filters import rest_framework as filters
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
+
 from permissions.permissions import HasGroupPerms
+
+from .filters import EventFilter
 from .models import Event
 from .serializers import EventSerializer, EventUpdateSerializer
 
 
-class EventViewset(viewsets.ViewSet):
+class EventViewset(viewsets.ModelViewSet):
+    __basic_fields = ('contract_id__client_id__last_name', 'contract_id__client_id__email', 'event_date')   
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-
+    filter_backends = [filters.DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = EventFilter
+    search_fields = __basic_fields
+    ordering_fields = __basic_fields
+    
     def get_object(self):
         obj = get_object_or_404(Event.objects.all(), contract_id=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
@@ -23,19 +33,6 @@ class EventViewset(viewsets.ViewSet):
         else:
             self.permission_classes = [IsAdminUser]
         return super().get_permissions()
-    
-    def get_queryset(self):
-        return Event.objects.all()
-    
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = EventSerializer(queryset, many=True)
-        return Response(serializer.data)
-    
-    def retrieve(self, request, pk=None):
-        client = self.get_object()
-        serializer = EventSerializer(client)
-        return Response(serializer.data)
 
     def create(self, request):
         serializer = EventSerializer(data=request.data)

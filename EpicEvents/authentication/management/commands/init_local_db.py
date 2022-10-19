@@ -14,16 +14,15 @@ UserModel = get_user_model()
 GROUPS = [
     { 'name' : 'Sales', 
      'permissions': {
-         'client': ['add', 'change', 'delete', 'view'],
-         'contract': ['add', 'change', 'delete', 'view'],
-         'event': ['view']
+         'client': ['add', 'change', 'view'],
+         'contract': ['add', 'change', 'view'],
+         'event': ['view', 'add']
          }
      },
     { 'name' : 'Support', 
      'permissions':{
          'client': ['view'],
-         'contract': ['view'],
-         'event': ['add', 'change', 'delete', 'view']
+         'event': ['add', 'change', 'view']
         }
      },
     { 'name' : 'Management', 'permissions': 'all'}

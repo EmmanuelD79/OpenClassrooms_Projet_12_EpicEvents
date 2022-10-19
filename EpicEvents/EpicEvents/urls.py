@@ -18,6 +18,11 @@ from django.urls import include, path
 from authentication.admin import crm_site
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+# from django.urls import path
+
+# def trigger_error(request):
+#     division_by_zero = 1 / 0
+
 urlpatterns = [
     path('crm/', crm_site.urls),
     path('api/', include('authentication.urls')),
@@ -26,6 +31,7 @@ urlpatterns = [
     path('api/', include('events.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    
+    path('api-auth/', include('rest_framework.urls')),
     path('admin/', admin.site.urls),
+    # path('sentry-debug/', trigger_error),
 ]
