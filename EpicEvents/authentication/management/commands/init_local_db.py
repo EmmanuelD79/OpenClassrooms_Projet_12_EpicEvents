@@ -1,4 +1,3 @@
-from asyncio import events
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
@@ -8,6 +7,10 @@ from contracts.models import Contract
 from events.models import Event, EventStatus
 from datetime import date
 
+try:
+    import init_config
+except ImportError:
+    raise ImportError('Veuiller configurer votre fichier init_config.py à la racine du projet')
 
 UserModel = get_user_model()
 
@@ -114,10 +117,10 @@ EVENTS = [
 ]
 
 
-ADMIN_ID = 'admin@epic.com'
-ADMIN_PASSWORD = 'Azerty01'
-ADMIN_FIRST_NAME = 'Admin'
-ADMIN_LAST_NAME = 'EPIC'
+ADMIN_ID = init_config.ADMIN_ID
+ADMIN_PASSWORD = init_config.ADMIN_PASSWORD
+ADMIN_FIRST_NAME = init_config.ADMIN_FIRST_NAME
+ADMIN_LAST_NAME = init_config.ADMIN_LAST_NAME
 
 
 class Command(BaseCommand):
@@ -127,42 +130,34 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.MIGRATE_HEADING(self.help))
         
+        if 0 <= UserModel.objects.all().count() < 1 or Group.objects.all().count() == 0:
+            self.stdout.write(self.style.ERROR("Veuillez d'abord initialiser le projet avec la commande init_project"))
+            quit()
+            
+     
         Event.objects.all().delete()
         EventStatus.objects.all().delete()
         Contract.objects.all().delete()
         Client.objects.all().delete()
         ClientStatus.objects.all().delete()
-        UserModel.objects.all().delete()
-        Group.objects.all().delete()
-        
-        for data_group in GROUPS:
-            group_perms = []
-            group = Group.objects.create(name=data_group['name'])
-            if data_group['permissions'] == 'all':
-                all_permission = Permission.objects.all()
-                group.permissions.set(all_permission)
-            else:
-                for data_perm in data_group['permissions']:
-                    for data_auto in data_group['permissions'][data_perm]:
-                        try:
-                            perm_obj = Permission.objects.get(codename=f'{data_auto}_{data_perm}')
-                            group_perms.append(perm_obj.id)
-                        except:
-                            continue
-                group.permissions.set(group_perms)
-                
-        for data_employee in EMPLOYEES:
-            employee = Employee.objects.create_user(
-                    first_name = data_employee['first_name'],
-                    last_name = data_employee['last_name'],
-                    email = data_employee['email'],
-                    phone = data_employee['phone'],
-                    mobile = data_employee['mobile'],
-                    password = data_employee['password'],
-                )
-            employee_group = Group.objects.get(name=data_employee['group'])
-            employee_group.user_set.add(employee.id)
+
             
+        try :  
+            for data_employee in EMPLOYEES:
+                employee = Employee.objects.create_user(
+                        first_name = data_employee['first_name'],
+                        last_name = data_employee['last_name'],
+                        email = data_employee['email'],
+                        phone = data_employee['phone'],
+                        mobile = data_employee['mobile'],
+                        password = data_employee['password'],
+                    )
+                employee_group = Group.objects.get(name=data_employee['group'])
+                employee_group.user_set.add(employee.id)
+            
+        except:
+            self.stdout.write(self.style.ERROR("Veuillez d'abord initialiser le projet avec la commande init_project"))
+            quit()
             
         for data_client_status in CLIENT_STATUS:
             ClientStatus.objects.create(
@@ -202,15 +197,6 @@ class Command(BaseCommand):
                 event_status = EventStatus.objects.get(status=data_event['event_status']),
                 support_contact_id = Employee.objects.get(email=data_event['support_contact_id'])
             )
-        
-        UserModel.objects.create_superuser(
-            email=ADMIN_ID,
-            password=ADMIN_PASSWORD,
-            first_name=ADMIN_FIRST_NAME,
-            last_name=ADMIN_LAST_NAME
-            )
             
         self.stdout.write(self.style.SUCCESS("All Done !"))
-        
-
-        
+ 
