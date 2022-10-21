@@ -4,3 +4,4 @@ EpicEvents/__pycache__/
 *$py.class
 **/.DS_Store
 .vscode
+EpicEvents/init_config.py
