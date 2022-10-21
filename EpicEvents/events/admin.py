@@ -17,8 +17,8 @@ class EventAdmin(admin.ModelAdmin):
     
     readonly_fields = ('date_created', 'date_updated')
     list_display = ('contract_id', 'event_status')
-    list_filter = ('event_status', 'support_contact_id__email')
-    search_fields = ['event_date', 'attendees']
+    list_filter = ('event_status', 'contract_id__client_id__last_name', 'contract_id__client_id__email' )
+    search_fields = ['event_date', 'contract_id__client_id__last_name', 'contract_id__client_id__email' ]
 
     @staticmethod
     def full_name(obj):
@@ -50,6 +50,11 @@ class EventAdmin(admin.ModelAdmin):
 
         return form
     
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(contract_id__client_id__sales_contact_id=request.user) | qs.filter(support_contact_id=request.user)
     
     
 crm_site.register(EventStatus)

@@ -25,8 +25,7 @@ class EmployeeAdmin(admin.ModelAdmin):
     @staticmethod
     def full_name(obj):
         return f"{obj.last_name.upper()}  {obj.first_name.capitalize()}"
-    
-    
+        
 
 crm_site.register(Group)
 

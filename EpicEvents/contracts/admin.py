@@ -13,8 +13,8 @@ class ContractAdmin(admin.ModelAdmin):
     
     readonly_fields = ('date_created', 'date_updated')
     list_display = ('client_id', 'full_name', 'company_name', 'payment_due' , 'amount_float', 'status' )
-    list_filter = ('client_id__company_name', 'status')
-    search_fields = ['amount_float', 'payment_due']
+    list_filter = ('client_id__last_name', 'client_id__email', 'date_created', 'amount_float')
+    search_fields = ['client_id__last_name', 'client_id__email', 'date_created', 'amount_float']
 
     @staticmethod
     def full_name(obj):
@@ -23,6 +23,12 @@ class ContractAdmin(admin.ModelAdmin):
     @staticmethod
     def company_name(obj):
         return f"{obj.client_id.company_name.upper()}"
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(client_id__sales_contact_id=request.user)| qs.filter(event__support_contact_id=request.user)
 
 
 crm_site.register(Contract, ContractAdmin)

@@ -15,8 +15,8 @@ class ClientAdmin(admin.ModelAdmin):
     
     readonly_fields = ('date_created', 'date_updated')
     list_display = ('full_name', 'email', 'phone', 'mobile', 'company_name', 'status' )
-    list_filter = ('company_name', 'status', 'sales_contact_id__email')
-    search_fields = ['first_name', 'last_name', 'company_name', 'sales_contact_id__email' ]
+    list_filter = ('last_name', 'email')
+    search_fields = ['last_name', 'email']
 
     @staticmethod
     def full_name(obj):
@@ -31,6 +31,12 @@ class ClientAdmin(admin.ModelAdmin):
             except:
                 kwargs["queryset"] = Employee.objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(sales_contact_id=request.user) | qs.filter(contract__event__support_contact_id=request.user)
     
     
 crm_site.register(ClientStatus)
