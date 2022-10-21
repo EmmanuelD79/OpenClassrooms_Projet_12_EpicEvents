@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+
+try:
+    import init_config
+except ImportError:
+    raise ImportError('Veuiller configurer votre fichier init_config.py à la racine du projet')
+
 # import sentry_sdk
 # from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -23,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ps%z=$4ow!=pu^01be!jdx0!+opcd!j!x=8hq9oh7dxxv(tel5'
+SECRET_KEY = init_config.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -34,7 +40,7 @@ SECURE_SSL_REDIRECT = False
 
 SESSION_COOKIE_SECURE = False
 
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
 
 
 # Application definition
@@ -92,14 +98,12 @@ WSGI_APPLICATION = 'EpicEvents.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': 'postgres',
-        'NAME': 'epic_events_db',
-        'PASSWORD': '1234',
-        'HOST': '127.0.0.1',
-        'PORT': '5431',
-        'TEST': {
-            'NAME': 'test_epic_events_db',
-        },
+        'USER': init_config.DB_USER,
+        'NAME': init_config.DB_NAME,
+        'PASSWORD': init_config.DB_PASSWORD,
+        'HOST': init_config.DB_HOST,
+        'PORT': init_config.DB_PORT,
+        'TEST': init_config.DB_TEST,
     }
 }  
     
@@ -156,7 +160,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         ),
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly'
+        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAdminUser',
     ],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'TEST_REQUEST_RENDERER_CLASSES': [
@@ -174,7 +179,7 @@ SIMPLE_JWT = {
 }
 
 # sentry_sdk.init(
-#     dsn="https://2d24ae77fed44c0ca3789a2c049f4782@o4504011784126464.ingest.sentry.io/4504011788713984",
+#     dsn = init_config.SENTRY_DNS,
 #     integrations=[
 #         DjangoIntegration(),
 #     ],
