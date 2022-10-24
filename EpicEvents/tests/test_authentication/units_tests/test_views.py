@@ -2,8 +2,7 @@ import pytest
 
 from django.urls import reverse
 from django.test import Client
-from authentication.models import Employee, Group
-from pytest_django.asserts import assertTemplateUsed
+from authentication.models import Employee
 
 
 @pytest.mark.django_db  
@@ -11,20 +10,11 @@ class TestLogin:
     
     pytestmark = pytest.mark.django_db
     
-    def test_login_view_with_good_user(self):
+    def test_login_view_with_good_user(self, employee_data):
         client = Client()
-        group = Group.objects.create(name="Sales")
-        employee = Employee.objects.create_user(
-                        first_name = "Pierre",
-                        last_name = "Jean",
-                        email = "pierre.jean@gmail.com",
-                        phone = "0102030405",
-                        mobile = "0601020304",
-                        password = "S3cr3tW0rd",
-                        group_name = group
-                    )
+        employee = Employee.objects.create_user(**employee_data)
         path = reverse('login')
-        response = client.post(path, {'email': employee.email, 'password': "S3cr3tW0rd"})
+        response = client.post(path, {'email': employee_data['email'], 'password': employee_data['password']})
         assert response.status_code == 200
         assert response.data["msg"] == "Login Success"
         assert response.data["access"] != ""
