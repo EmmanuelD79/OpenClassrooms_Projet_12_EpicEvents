@@ -3,9 +3,9 @@ from authentication.models import Employee
 from clients.models import ClientStatus, Client
 from contracts.models import Contract
 from events.models import EventStatus, Event
-from authentication.utils import InitDb
+from utils.utils import InitDb
 from rest_framework.test import APITestCase
-from tests.datas import EMPLOYEES, CLIENTS, ADMIN_USER, EVENTS_STATUS, NEW_CONTRACT
+from utils.data import EMPLOYEES, CLIENTS, ADMIN_USER, EVENTS_STATUS, NEW_CONTRACT
 from datetime import date
 
 @pytest.fixture
@@ -118,4 +118,7 @@ class ViewTest(APITestCase):
     
     def format_datetime(self, value):
         return value.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    
+    def format_date(self, value):
+        return value.strftime("%Y-%m-%d")
         

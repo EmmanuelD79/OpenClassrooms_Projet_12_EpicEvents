@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login
 from rest_framework import status, response
-from authentication.utils import get_tokens_for_user
+from utils.utils import get_tokens_for_user
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 

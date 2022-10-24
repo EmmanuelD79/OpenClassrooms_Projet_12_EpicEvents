@@ -4,14 +4,11 @@ from events.models import Event
 from authentication.models import Employee
 from datetime import date
 from tests.conftest import ViewTest
-from tests.datas import EMPLOYEES, ADMIN_USER, NEW_CONTRACT, CLIENTS, NEW_EVENT, CONTRACTS
+from utils.data import EMPLOYEES, ADMIN_USER, NEW_EVENT, CONTRACTS
 from parametrize import parametrize
-from authentication.utils import InitDb
+from utils.utils import InitDb
 
 class EventTest(ViewTest):
-
-    def format_date(self, value):
-        return value.strftime("%Y-%m-%d")
     
     def get_event_list_data(self, events, status_code):
         

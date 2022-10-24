@@ -1,9 +1,7 @@
 import pytest
 from events.models import Event, EventStatus
-from authentication.models import Employee, Group
-from clients.models import Client, ClientStatus
 from datetime import date
-from tests.datas import EVENTS, EVENTS_STATUS
+from utils.data import EVENTS_STATUS
 
 
 @pytest.mark.django_db 

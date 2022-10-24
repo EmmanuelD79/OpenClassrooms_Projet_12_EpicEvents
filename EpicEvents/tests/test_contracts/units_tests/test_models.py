@@ -1,7 +1,6 @@
 import pytest
-from clients.models import Client, ClientStatus
+from clients.models import Client
 from contracts.models import Contract
-from authentication.models import Employee, Group
 from datetime import date
 
 @pytest.mark.django_db

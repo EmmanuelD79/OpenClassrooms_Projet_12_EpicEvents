@@ -4,11 +4,20 @@ from authentication.models import Employee
 from clients.models import Client, ClientStatus
 from contracts.models import Contract
 from events.models import Event, EventStatus
-from datetime import date
-from tests.datas import EMPLOYEES, CLIENTS, ADMIN_USER, EVENTS_STATUS, GROUPS, CLIENT_STATUS, CONTRACTS, EVENTS
-
+from .data import EMPLOYEES, CLIENTS, ADMIN_USER, EVENTS_STATUS, GROUPS, CLIENT_STATUS, CONTRACTS, EVENTS
+from django.contrib.auth import get_user_model
 
 def get_tokens_for_user(user):
+    """
+    Get refresh and access tokens for the request.user
+    
+    Args:
+        user (Employee): Login user
+
+    Returns:
+        'refresh': Refresh token
+        'access' : Access token
+    """
     refresh = RefreshToken.for_user(user)
     
     return {
@@ -17,7 +26,10 @@ def get_tokens_for_user(user):
     }
 
 class InitDb:
-    
+    """
+    Use to init a dataset for tests and demo.
+    """
+        
     def _init_db_group():
         for data_group in GROUPS:
             group_perms = []
@@ -94,6 +106,9 @@ class InitDb:
             
     @classmethod
     def run(cls):
+        """
+        Create a complete dataset into database.
+        """     
         cls._init_db_group()
         cls._init_db_employee()
         cls._init_db_client_status()
@@ -101,9 +116,12 @@ class InitDb:
         cls._init_db_contracts()
         cls._init_db_event_status()
         cls._init_db_event()
-        
-    @classmethod  
-    def refresh_db(cls):
+         
+    @classmethod
+    def destroy_db(cls):
+        """
+        Delete all tables of database.
+        """     
         Event.objects.all().delete()
         EventStatus.objects.all().delete()
         Contract.objects.all().delete()
@@ -111,14 +129,50 @@ class InitDb:
         ClientStatus.objects.all().delete()
         Employee.objects.all().delete()
         Group.objects.all().delete()
-        cls.run()
         
     @classmethod
     def create_admin_user(cls):
-        Employee.objects.create_superuser(
+        """
+        Create an admin user as superuser.
+        """     
+        admin_user =get_user_model()
+        admin_user.objects.create_superuser(
             email=ADMIN_USER['email'],
             password=ADMIN_USER['password'],
             first_name=ADMIN_USER['first_name'],
             last_name=ADMIN_USER['last_name']
             )
+    
+    @classmethod  
+    def refresh_db(cls):
+        """
+        Refresh the database with the demo dataset.
+        """     
+        cls.destroy_db()
+        cls.run()
+    
+    @classmethod
+    def create_groups_user(cls):
+        """
+        Create all groups : "Management", "Sales" and "Support" into database.
+        """        
+        cls._init_db_group()
+        
+    @classmethod
+    def run_dataset(cls):
+        """
+        Create a demo dataset into database.
+        """     
+        Event.objects.all().delete()
+        EventStatus.objects.all().delete()
+        Contract.objects.all().delete()
+        Client.objects.all().delete()
+        ClientStatus.objects.all().delete()
+        
+        cls._init_db_employee()
+        cls._init_db_client_status()
+        cls._init_db_client()
+        cls._init_db_contracts()
+        cls._init_db_event_status()
+        cls._init_db_event()
         

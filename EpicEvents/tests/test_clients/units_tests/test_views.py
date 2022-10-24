@@ -1,12 +1,10 @@
 from django.urls import reverse_lazy, reverse
-from rest_framework import status
 from tests.conftest import ViewTest
 from clients.models import Client
 from authentication.models import Employee
-from authentication.utils import InitDb
-from tests.datas import EMPLOYEES, NEW_CLIENT, CLIENTS, ADMIN_USER
+from utils.utils import InitDb
+from utils.data import EMPLOYEES, NEW_CLIENT, ADMIN_USER
 from parametrize import parametrize
-import json
 
 
 class ClientTest(ViewTest):

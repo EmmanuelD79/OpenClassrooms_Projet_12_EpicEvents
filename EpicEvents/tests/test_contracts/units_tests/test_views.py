@@ -4,15 +4,11 @@ from clients.models import Client
 from contracts.models import Contract
 from authentication.models import Employee
 from datetime import date
-from authentication.utils import InitDb
-from tests.datas import EMPLOYEES, ADMIN_USER, NEW_CONTRACT, CLIENTS
+from utils.utils import InitDb
+from utils.data import EMPLOYEES, ADMIN_USER, NEW_CONTRACT, CLIENTS
 from parametrize import parametrize
-import json
 
 class ContractTest(ViewTest):
-
-    def format_date(self, value):
-        return value.strftime("%Y-%m-%d")
     
     def get_contract_list_data(self, contracts, status_code):
         if status_code == 200:

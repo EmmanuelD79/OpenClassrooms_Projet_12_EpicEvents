@@ -1,5 +1,9 @@
 from datetime import date
-from init_config import ADMIN_FIRST_NAME, ADMIN_ID, ADMIN_LAST_NAME, ADMIN_PASSWORD
+
+try:
+    from init_config import ADMIN_FIRST_NAME, ADMIN_ID, ADMIN_LAST_NAME, ADMIN_PASSWORD
+except ImportError:
+    raise ImportError('Veuiller configurer votre fichier init_config.py à la racine du projet')
 
 GROUPS = [
     { 'name' : 'Sales', 

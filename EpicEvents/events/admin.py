@@ -1,11 +1,6 @@
 from django.contrib import admin
 from .models import Event, EventStatus
 from authentication.admin import crm_site
-from django.contrib import messages
-from django.contrib.auth.models import Group, Permission
-from authentication.models import Employee
-from contracts.models import Contract
-
 
 
 class EventAdmin(admin.ModelAdmin):
