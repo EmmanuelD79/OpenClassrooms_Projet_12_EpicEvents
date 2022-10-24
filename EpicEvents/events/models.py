@@ -1,7 +1,7 @@
 from django.db import models
 from authentication.models import Employee
 from contracts.models import Contract
-
+from authentication.models import DateTimeInfo
 
 class EventStatus(models.Model):
     status = models.CharField("Status", max_length=30, primary_key=True)
@@ -13,10 +13,8 @@ class EventStatus(models.Model):
         return f"{self.status}"
     
 
-class Event(models.Model):
+class Event(DateTimeInfo):
     
-    date_created = models.DateTimeField("Crée le", auto_now_add=True)
-    date_updated = models.DateTimeField("Mise à jour le", auto_now=True)
     event_date = models.DateField("Date de l'évenement", editable=True, blank=True)
     attendees = models.IntegerField("Nb de personnes", default=0, blank=False)
     notes = models.TextField("Infos", blank=True)

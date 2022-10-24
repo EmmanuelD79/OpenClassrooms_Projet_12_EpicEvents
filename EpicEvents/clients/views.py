@@ -4,16 +4,15 @@ from django_filters import rest_framework as filters
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
 
-from permissions.permissions import HasGroupPerms
+from permissions.permissions_mixins import GetPermissionMixin
 
 from .filters import ClientFilter
 from .models import Client
 from .serializers import ClientSerializer
 
 
-class ClientViewset(viewsets.ModelViewSet): 
+class ClientViewset(GetPermissionMixin, viewsets.ModelViewSet): 
     __basic_fields = ('last_name', 'email')
     queryset = Client.objects.all()    
     serializer_class = ClientSerializer
@@ -26,13 +25,6 @@ class ClientViewset(viewsets.ModelViewSet):
         obj = get_object_or_404(self.queryset, id=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
-
-    def get_permissions(self):
-        if self.action in ['create', 'list', 'destroy', 'update', 'retrieve']:
-            self.permission_classes = [HasGroupPerms]
-        else:
-            self.permission_classes = [IsAdminUser]
-        return super().get_permissions()
     
     def create(self, request):
         serializer = self.serializer_class(data=request.data)

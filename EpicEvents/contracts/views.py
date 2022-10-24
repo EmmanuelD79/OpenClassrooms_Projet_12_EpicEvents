@@ -3,15 +3,14 @@ from django_filters import rest_framework as filters
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from permissions.permissions import HasGroupPerms
+from permissions.permissions_mixins import GetPermissionMixin
 
 from .filters import ContractFilter
 from .models import Contract
 from .serializers import ContractSerializer
 
 
-class ContratViewset(viewsets.ModelViewSet):
+class ContratViewset(GetPermissionMixin, viewsets.ModelViewSet):
     __basic_fields = ('client_id__last_name', 'client_id__email', 'date_created', 'amount_float')   
     queryset = Contract.objects.all()
     serializer_class = ContractSerializer
@@ -24,13 +23,6 @@ class ContratViewset(viewsets.ModelViewSet):
         obj = get_object_or_404(self.queryset, id=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
-
-    def get_permissions(self):
-        if self.action in ['create', 'list', 'destroy', 'update', 'retrieve']:
-            self.permission_classes = [HasGroupPerms]
-        else:
-            self.permission_classes = [IsAdminUser]
-        return super().get_permissions()
 
     def create(self, request):
         serializer = ContractSerializer(data=request.data)

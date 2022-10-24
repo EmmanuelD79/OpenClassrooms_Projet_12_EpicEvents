@@ -4,16 +4,15 @@ from django_filters import rest_framework as filters
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
 
-from permissions.permissions import HasGroupPerms
+from permissions.permissions_mixins import GetPermissionMixin
 
 from .filters import EventFilter
 from .models import Event
 from .serializers import EventSerializer, EventUpdateSerializer
 
 
-class EventViewset(viewsets.ModelViewSet):
+class EventViewset(GetPermissionMixin, viewsets.ModelViewSet):
     __basic_fields = ('contract_id__client_id__last_name', 'contract_id__client_id__email', 'event_date')   
     queryset = Event.objects.all()
     serializer_class = EventSerializer
@@ -26,13 +25,6 @@ class EventViewset(viewsets.ModelViewSet):
         obj = get_object_or_404(Event.objects.all(), contract_id=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
-
-    def get_permissions(self):
-        if self.action in ['create', 'list', 'destroy', 'update', 'retrieve']:
-            self.permission_classes = [HasGroupPerms]
-        else:
-            self.permission_classes = [IsAdminUser]
-        return super().get_permissions()
 
     def create(self, request):
         serializer = EventSerializer(data=request.data)

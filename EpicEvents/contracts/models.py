@@ -1,13 +1,11 @@
 from django.db import models
 from clients.models import Client
+from authentication.models import DateTimeInfo
 
 
 
-
-class Contract(models.Model):
+class Contract(DateTimeInfo):
     
-    date_created = models.DateTimeField("Crée le", auto_now_add=True)
-    date_updated = models.DateTimeField("Mise à jour le", auto_now=True)
     payment_due = models.DateField("Date de réglement", editable=True, blank=True)
     amount_float = models.FloatField("Montant", default=0)
     client_id = models.ForeignKey(Client, max_length=25,blank=False, verbose_name='Client', on_delete=models.CASCADE)      

@@ -1,7 +1,30 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, Group, Permission
+from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.core.validators import RegexValidator
 
+
+class DateTimeInfo(models.Model):
+    date_created = models.DateTimeField("Crée le", auto_now_add=True)
+    date_updated = models.DateTimeField("Mise à jour le", auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
+class PhoneInfo(models.Model):
+    phone = models.CharField(
+        "Téléphone",
+        max_length=15,
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$')]
+    )
+    mobile = models.CharField(
+        "Portable",
+        max_length=15,
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$')]
+    )
+
+    class Meta:
+        abstract = True
 
 class UserManager(BaseUserManager):
     """Define a model manager for User model with no username field."""
@@ -51,26 +74,10 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-class Employee(AbstractBaseUser, PermissionsMixin):
+class Employee(AbstractUser, PermissionsMixin, DateTimeInfo, PhoneInfo):
     
-    first_name = models.CharField("Prénom", max_length=25,blank=False)
-    last_name = models.CharField("Nom", max_length=25, blank=False)
     email = models.EmailField("Email", max_length=50, blank=False, unique=True)
-    phone = models.CharField(
-        "Téléphone",
-        max_length=15,
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$')]
-    )
-    mobile = models.CharField(
-        "Portable",
-        max_length=15,
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$')]
-    )
-    date_created = models.DateTimeField("Crée le", auto_now_add=True)
-    date_updated = models.DateTimeField("Mise à jour le", auto_now=True)
-    is_staff = models.BooleanField()
-    is_superuser = models.BooleanField()
-    
+    username = None
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
@@ -79,6 +86,7 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     
     class Meta:
         verbose_name="Salariée"
+
     
     def __str__(self):
         return f"{self.first_name} {self.last_name} | {self.email}"
