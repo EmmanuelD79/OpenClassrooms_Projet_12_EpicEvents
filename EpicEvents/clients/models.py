@@ -22,5 +22,8 @@ class Client(PhoneInfo, DateTimeInfo):
     sales_contact_id = models.ForeignKey(Employee, on_delete=models.PROTECT, verbose_name="Commercial")
     status = models.ForeignKey(ClientStatus, max_length=25,blank=False, verbose_name='Status du Client', on_delete=models.PROTECT)
     
+    class Meta:
+        ordering = ('pk', )
+    
     def __str__(self):
         return f"{self.first_name} {self.last_name} | {self.email} | {self.company_name}"

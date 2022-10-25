@@ -16,12 +16,14 @@ class PhoneInfo(models.Model):
     phone = models.CharField(
         "Téléphone",
         max_length=15,
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$')]
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$')],
+        blank=True,
     )
     mobile = models.CharField(
         "Portable",
         max_length=15,
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$')]
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$')],
+        blank=True
     )
 
     class Meta:
@@ -77,10 +79,12 @@ class UserManager(BaseUserManager):
 
 class Employee(AbstractUser, PermissionsMixin, DateTimeInfo, PhoneInfo):
     
-    email = models.EmailField("Email", max_length=50, blank=False, unique=True)
+    email = models.EmailField("Email", max_length=256, blank=False, unique=True)
     username = None
+    first_name = models.CharField("Prénom",max_length=256, blank=False)
+    last_name = models.CharField("Nom",max_length=256, blank=False)
     
-    is_staff = models.BooleanField(default=False, verbose_name="utilisateur")
+    is_staff = models.BooleanField(default=True, verbose_name="utilisateur")
     is_superuser = models.BooleanField(default=False, verbose_name="Administrateur")
     
     USERNAME_FIELD = 'email'
@@ -90,6 +94,7 @@ class Employee(AbstractUser, PermissionsMixin, DateTimeInfo, PhoneInfo):
     
     class Meta:
         verbose_name="Salariée"
+        ordering = ('email', )
 
     
     def __str__(self):

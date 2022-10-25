@@ -7,7 +7,7 @@ from events.models import Event
 
 class EventAdmin(admin.ModelAdmin):
     fieldsets = (
-        ('Details Event',
+        ("Détail de l'événement",
          {'fields': ('contract_id', 'event_status', 'notes')}),
         ('Info', {'fields': ('support_contact_id', 'event_date', 'attendees', 'date_created', 'date_updated')})
     )
@@ -60,8 +60,8 @@ class EventAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-
-        if request.user.is_superuser:  # type: ignore
+        
+        if request.user.is_superuser:
             return qs
         return qs.filter(contract_id__client_id__sales_contact_id=request.user) | qs.filter(support_contact_id=request.user)
     

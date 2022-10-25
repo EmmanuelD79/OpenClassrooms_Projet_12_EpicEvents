@@ -39,7 +39,7 @@ class ClientAdmin(admin.ModelAdmin):
             except:
                 kwargs["queryset"] = Employee.objects.all()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-    
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.is_superuser:

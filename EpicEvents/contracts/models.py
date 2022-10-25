@@ -12,5 +12,8 @@ class Contract(DateTimeInfo):
     status = models.BooleanField("Validé", default=False)
     name = models.CharField("Nom de l'événement", max_length=100, blank=False)
     
+    class Meta:
+        ordering = ('pk', )
+    
     def __str__(self):
         return f"{self.client_id.company_name} | {self.name} | {self.status} | {self.amount_float}"
