@@ -4,7 +4,11 @@ from authentication.models import Employee
 from authentication.admin import crm_site
 from django.contrib.auth.models import Group, Permission
 from django.contrib import messages
+from contracts.models import Contract
 
+
+class ContractItemAdmin(admin.TabularInline):
+    model = Contract
 
 class ClientAdmin(admin.ModelAdmin):
     fieldsets = (
@@ -17,10 +21,14 @@ class ClientAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'email', 'phone', 'mobile', 'company_name', 'status' )
     list_filter = ('last_name', 'email')
     search_fields = ['last_name', 'email']
+    
+    inlines = [ContractItemAdmin,]
 
-    @staticmethod
-    def full_name(obj):
-        return f"{obj.last_name.upper()}  {obj.first_name.capitalize()}"
+    def full_name(self, instance):
+        return f"{instance.last_name.upper()}  {instance.first_name.capitalize()}"
+    
+    full_name.short_description = "Client"
+    full_name.admin_order_field = "last_name"
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "sales_contact_id":
@@ -41,4 +49,3 @@ class ClientAdmin(admin.ModelAdmin):
     
 crm_site.register(ClientStatus)
 crm_site.register(Client, ClientAdmin)
-

@@ -19,7 +19,7 @@ class Event(DateTimeInfo):
     attendees = models.IntegerField("Nb de personnes", default=0, blank=False)
     notes = models.TextField("Infos", blank=True)
     support_contact_id = models.ForeignKey(Employee, on_delete=models.PROTECT, verbose_name="Chargé de l'événement")
-    event_status = models.ForeignKey(EventStatus, on_delete=models.PROTECT, verbose_name="Etat de l'évenement")
+    event_status = models.ForeignKey(EventStatus, on_delete=models.PROTECT, verbose_name="Etat d'avancement")
     contract_id = models.OneToOneField(Contract, null=False, verbose_name='Contract', on_delete=models.PROTECT, primary_key=True)  
     
     def __str__(self):

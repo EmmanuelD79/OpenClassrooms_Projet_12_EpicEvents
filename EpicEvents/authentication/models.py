@@ -1,3 +1,4 @@
+from tabnanny import verbose
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin, Group, Permission
 from django.core.validators import RegexValidator
@@ -78,6 +79,9 @@ class Employee(AbstractUser, PermissionsMixin, DateTimeInfo, PhoneInfo):
     
     email = models.EmailField("Email", max_length=50, blank=False, unique=True)
     username = None
+    
+    is_staff = models.BooleanField(default=False, verbose_name="utilisateur")
+    is_superuser = models.BooleanField(default=False, verbose_name="Administrateur")
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
