@@ -1,6 +1,9 @@
+argon2-cffi==21.3.0
+argon2-cffi-bindings==21.2.0
 asgiref==3.5.2
 attrs==22.1.0
 certifi==2022.9.24
+cffi==1.15.1
 Django==4.1.2
 django-filter==22.1
 djangorestframework==3.14.0
@@ -8,10 +11,12 @@ djangorestframework-simplejwt==5.2.1
 iniconfig==1.1.1
 mock==4.0.3
 packaging==21.3
+parametrize==0.1.1
 pluggy==1.0.0
 psycopg2==2.9.4
 psycopg2-binary==2.9.4
 py==1.11.0
+pycparser==2.21
 PyJWT==2.5.0
 pyparsing==3.0.9
 pytest==7.1.3
