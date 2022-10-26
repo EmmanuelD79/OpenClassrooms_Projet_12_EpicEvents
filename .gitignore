@@ -7,3 +7,6 @@ EpicEvents/__pycache__/
 EpicEvents/init_config.py
 .flake8
 flake-report/
+.coveragerc
+htmlcov/
+.coverage
