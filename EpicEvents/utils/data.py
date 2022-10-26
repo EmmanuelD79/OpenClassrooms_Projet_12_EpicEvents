@@ -6,20 +6,20 @@ except ImportError:
     raise ImportError('Veuiller configurer votre fichier init_config.py à la racine du projet')
 
 GROUPS = [
-    { 'name' : 'Sales', 
+    {'name': 'Sales',
      'permissions': {
          'client': ['add', 'change', 'view'],
          'contract': ['add', 'change', 'view'],
          'event': ['view', 'add']
          }
      },
-    { 'name' : 'Support', 
-     'permissions':{
+    {'name': 'Support',
+     'permissions': {
          'client': ['view'],
          'event': ['change', 'view']
         }
      },
-    { 'name' : 'Management', 'permissions': 'all'}
+    {'name': 'Management', 'permissions': 'all'}
 ]
 
 EMPLOYEES = [
@@ -81,12 +81,14 @@ CONTRACTS = [
         'payment_due': date.today(),
         'amount_float': 30000.40,
         'client_id': CLIENTS[0]['email'],
+        'status': True,
         'name': 'Fête de la bière'
     },
     {
         'payment_due': date.today(),
         'amount_float': 5000.40,
         'client_id': CLIENTS[1]['email'],
+        'status': True,
         'name': 'La suprème'
     }
 ]
@@ -107,16 +109,16 @@ EVENTS = [
     {
         'event_date': date.today(),
         'attendees': 1500,
-        'contract_id': 'Fête de la bière' ,
+        'contract_id': 'Fête de la bière',
         'event_status': 'En préparation',
         'support_contact_id': 'paul.jacques@gmail.com'
     }
 ]
 
-NEW_EVENT ={
+NEW_EVENT = {
         'event_date': date.today(),
         'attendees': 3000,
-        'contract_id': 'LA super_event' ,
+        'contract_id': 'LA super_event',
         'event_status': 'En préparation',
         'support_contact_id': 'paul.jacques@gmail.com'
     }
@@ -124,7 +126,7 @@ NEW_EVENT ={
 
 NEW_CLIENT = {
         'first_name': "Tom",
-        'last_name' : "Pierre",
+        'last_name': "Pierre",
         'email': "tom.pierre@gmail.com",
         'phone': "0102030405",
         'mobile': "0601020304",
@@ -143,6 +145,6 @@ ADMIN_USER = {
 NEW_CONTRACT = {
     'payment_due': date.today(),
     'amount_float': 1000.40,
-    'status': False,
-    'name': "L'evenement du siecle"
+    'status': True,
+    'name': "L'evenement du siecle",
     }

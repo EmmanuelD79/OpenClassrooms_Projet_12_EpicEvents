@@ -13,14 +13,14 @@ from .serializers import EventSerializer, EventUpdateSerializer
 
 
 class EventViewset(GetPermissionMixin, viewsets.ModelViewSet):
-    __basic_fields = ('contract_id__client_id__last_name', 'contract_id__client_id__email', 'event_date')   
+    __basic_fields = ('contract_id__client_id__last_name', 'contract_id__client_id__email', 'event_date')
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     filter_backends = [filters.DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = EventFilter
     search_fields = __basic_fields
     ordering_fields = __basic_fields
-    
+
     def get_object(self):
         obj = get_object_or_404(Event.objects.all(), contract_id=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
@@ -35,7 +35,7 @@ class EventViewset(GetPermissionMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(support_contact_id=self.request.user)
-        
+
     def update(self, request, pk=None):
         event = self.get_object()
         serializer = EventUpdateSerializer(event, data=request.data)

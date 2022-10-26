@@ -5,3 +5,5 @@ EpicEvents/__pycache__/
 **/.DS_Store
 .vscode
 EpicEvents/init_config.py
+.flake8
+flake-report/

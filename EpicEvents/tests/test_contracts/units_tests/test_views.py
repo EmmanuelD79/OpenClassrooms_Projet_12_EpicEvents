@@ -8,8 +8,8 @@ from utils.utils import InitDb
 from utils.data import EMPLOYEES, ADMIN_USER, NEW_CONTRACT, CLIENTS
 from parametrize import parametrize
 
+
 class ContractTest(ViewTest):
-    
     def get_contract_list_data(self, contracts, status_code):
         if status_code == 200:
             list_data = [{
@@ -22,12 +22,11 @@ class ContractTest(ViewTest):
             } for contract in contracts]
         elif status_code == 403:
             list_data = {'detail': "Vous n'avez pas la permission d'effectuer cette action."}
-    
         return list_data
-    
+
     def get_contract_detail_data(self, contract, status_code):
         if status_code == 200:
-            detail_data= {
+            detail_data = {
                 'id': contract.pk,
                 'client_id': contract.client_id.id,
                 'status': contract.status,
@@ -40,15 +39,14 @@ class ContractTest(ViewTest):
         return detail_data
 
 
-class ContractViewsetTests(ContractTest):   
+class ContractViewsetTests(ContractTest):
     url = reverse_lazy('contract-list')
-    
-    
-    @parametrize('user_email, status_code', 
+
+    @parametrize('user_email, status_code',
                  [
                      (ADMIN_USER['email'], 200),
                      (EMPLOYEES[0]['email'], 200),
-                     (EMPLOYEES[1]['email'], 403)   
+                     (EMPLOYEES[1]['email'], 403)
                  ])
     def test_contract_list(self, user_email, status_code):
         self.login_user(user_email)
@@ -56,7 +54,9 @@ class ContractViewsetTests(ContractTest):
         if user.is_superuser:
             self.contracts = Contract.objects.all()
         else:
-            self.contracts = Contract.objects.filter(client_id__sales_contact_id=user)| Contract.objects.filter(event__support_contact_id=user)
+            self.contracts = Contract.objects.filter(client_id__sales_contact_id=user) | Contract.objects.filter(
+                event__support_contact_id=user)
+
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status_code)
         expected = self.get_contract_list_data(self.contracts, status_code)
@@ -66,16 +66,16 @@ class ContractViewsetTests(ContractTest):
             self.assertEqual(response.json(), expected)
         InitDb.refresh_db()
 
-    @parametrize('user_email, status_code', 
+    @parametrize('user_email, status_code',
                  [
                      (ADMIN_USER['email'], 201),
                      (EMPLOYEES[0]['email'], 201),
-                     (EMPLOYEES[1]['email'], 403)   
+                     (EMPLOYEES[1]['email'], 403)
                  ])
     def test_contract_create(self, user_email, status_code):
         self.login_user(user_email)
         client_id = Client.objects.get(email=CLIENTS[0]['email'])
-        NEW_CONTRACT['client_id']= client_id.pk
+        NEW_CONTRACT['client_id'] = client_id.pk
         contract_count = Contract.objects.count()
         response = self.client.post(self.url, data=NEW_CONTRACT)
         self.assertEqual(response.status_code, status_code)
@@ -84,35 +84,33 @@ class ContractViewsetTests(ContractTest):
         elif status_code == 403:
             self.assertEqual(Contract.objects.count(), contract_count)
         InitDb.refresh_db()
-    
-    
-    @parametrize('user_email, status_code', 
+
+    @parametrize('user_email, status_code',
                  [
                      (ADMIN_USER['email'], 200),
                      (EMPLOYEES[0]['email'], 200),
-                     (EMPLOYEES[1]['email'], 403)   
+                     (EMPLOYEES[1]['email'], 403)
                  ])
     def test_contract_detail(self, user_email, status_code):
         self.login_user(user_email)
 
-        url_detail = reverse('contract-detail',kwargs={'pk': self.contract.pk})
+        url_detail = reverse('contract-detail', kwargs={'pk': self.contract.pk})
         response = self.client.get(url_detail)
-        
+
         self.assertEqual(response.status_code, status_code)
         excepted = self.get_contract_detail_data(self.contract, status_code)
         self.assertEqual(excepted, response.json())
         InitDb.refresh_db()
-     
-     
-    @parametrize('user_email, status_code', 
+
+    @parametrize('user_email, status_code',
                  [
                      (ADMIN_USER['email'], 200),
                      (EMPLOYEES[0]['email'], 200),
-                     (EMPLOYEES[1]['email'], 403)   
-                 ])   
+                     (EMPLOYEES[1]['email'], 403)
+                 ])
     def test_update(self, user_email, status_code):
         self.login_user(user_email)
-        url_detail = reverse('contract-detail',kwargs={'pk': self.contract.pk})
+        url_detail = reverse('contract-detail', kwargs={'pk': self.contract.pk})
         data = {
                 'client_id': self.client_test.id,
                 'status': True,
@@ -121,7 +119,7 @@ class ContractViewsetTests(ContractTest):
                 'name': 'la fête de la biere'
         }
         if status_code == 200:
-            excepted = {'id': self.contract.pk,}
+            excepted = {'id': self.contract.pk}
             excepted.update(data)
         elif status_code == 403:
             excepted = {'detail': "Vous n'avez pas la permission d'effectuer cette action."}
@@ -129,21 +127,20 @@ class ContractViewsetTests(ContractTest):
         self.assertEqual(response.status_code, status_code)
         self.assertEqual(excepted, response.json())
         InitDb.refresh_db()
-    
-    @parametrize('user_email, status_code', 
+
+    @parametrize('user_email, status_code',
                  [
                      (ADMIN_USER['email'], 204),
                      (EMPLOYEES[0]['email'], 403),
-                     (EMPLOYEES[1]['email'], 403)   
-                 ])  
+                     (EMPLOYEES[1]['email'], 403)
+                 ])
     def test_delete(self, user_email, status_code):
         self.login_user(ADMIN_USER['email'])
         client_id = Client.objects.get(email=CLIENTS[0]['email'])
-        NEW_CONTRACT['client_id']= client_id.pk
+        NEW_CONTRACT['client_id'] = client_id.pk
         self.client.post(self.url, data=NEW_CONTRACT)
         new_contract = Contract.objects.get(name=NEW_CONTRACT['name'])
         self.login_user(user_email)
         response = self.client.delete(reverse('contract-detail', kwargs={'pk': new_contract.pk}))
         self.assertEqual(response.status_code, status_code)
         InitDb.refresh_db()
-        

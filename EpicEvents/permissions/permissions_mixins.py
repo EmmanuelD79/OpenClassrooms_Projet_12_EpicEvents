@@ -1,6 +1,7 @@
 from rest_framework.permissions import IsAdminUser
 from permissions.permissions import HasGroupPerms
 
+
 class GetPermissionMixin:
     def get_permissions(self):
         if self.action in ['create', 'list', 'destroy', 'update', 'retrieve']:

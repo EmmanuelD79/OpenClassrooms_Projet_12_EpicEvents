@@ -1,7 +1,8 @@
-from tabnanny import verbose
 from django.db import models
-from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin, Group, Permission
+from django.contrib.auth.models import AbstractUser,\
+    BaseUserManager, PermissionsMixin, Group, Permission
 from django.core.validators import RegexValidator
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class DateTimeInfo(models.Model):
@@ -28,6 +29,7 @@ class PhoneInfo(models.Model):
 
     class Meta:
         abstract = True
+
 
 class UserManager(BaseUserManager):
     """Define a model manager for User model with no username field."""
@@ -61,14 +63,15 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         try:
             group = Group.objects.get(name='Management')
-        except:
+
+        except ObjectDoesNotExist:
             group = Group.objects.create(name='Management')
             group.save()
             all_permission = Permission.objects.all()
             group.permissions.set(all_permission)
-        
+
         extra_fields.setdefault('group', group)
-        
+
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
@@ -78,25 +81,22 @@ class UserManager(BaseUserManager):
 
 
 class Employee(AbstractUser, PermissionsMixin, DateTimeInfo, PhoneInfo):
-    
     email = models.EmailField("Email", max_length=256, blank=False, unique=True)
     username = None
-    first_name = models.CharField("Prénom",max_length=256, blank=False)
-    last_name = models.CharField("Nom",max_length=256, blank=False)
-    
+    first_name = models.CharField("Prénom", max_length=256, blank=False)
+    last_name = models.CharField("Nom", max_length=256, blank=False)
+
     is_staff = models.BooleanField(default=True, verbose_name="utilisateur")
     is_superuser = models.BooleanField(default=False, verbose_name="Administrateur")
-    
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
     objects = UserManager()
-    
-    class Meta:
-        verbose_name="Salariée"
-        ordering = ('email', )
 
-    
+    class Meta:
+        verbose_name = "Salariée"
+        ordering = ('email',)
+
     def __str__(self):
         return f"{self.first_name} {self.last_name} | {self.email}"
-    

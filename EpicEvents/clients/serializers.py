@@ -11,4 +11,3 @@ class ClientSerializer(serializers.ModelSerializer):
             'id': {'read_only': True},
             'sales_contact_id': {'read_only': True},
         }
-        

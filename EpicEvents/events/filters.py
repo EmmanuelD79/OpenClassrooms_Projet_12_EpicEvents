@@ -1,10 +1,12 @@
 from django_filters import rest_framework as filters
 from .models import Event
 
+
 class EventFilter(filters.FilterSet):
     """
     Event filter for API search.
     """
+
     class Meta:
         model = Event
         fields = {
@@ -17,7 +19,7 @@ class EventFilter(filters.FilterSet):
     def qs(self):
         parent = super().qs
         user = getattr(self.request, 'user', None)
-        
+
         if user.is_superuser:
             return parent.all()
         else:

@@ -12,4 +12,3 @@ class ContractSerializer(serializers.ModelSerializer):
             'date_created': {'read_only': True},
             'date_updated': {'read_only': True}
         }
-        

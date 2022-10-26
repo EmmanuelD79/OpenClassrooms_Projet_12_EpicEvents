@@ -11,7 +11,7 @@ from .serializers import ContractSerializer
 
 
 class ContratViewset(GetPermissionMixin, viewsets.ModelViewSet):
-    __basic_fields = ('client_id__last_name', 'client_id__email', 'date_created', 'amount_float')   
+    __basic_fields = ('client_id__last_name', 'client_id__email', 'date_created', 'amount_float')
     queryset = Contract.objects.all()
     serializer_class = ContractSerializer
     filter_backends = [filters.DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -30,7 +30,7 @@ class ContratViewset(GetPermissionMixin, viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
     def update(self, request, pk=None):
         client = self.get_object()
         serializer = ContractSerializer(client, data=request.data)

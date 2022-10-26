@@ -105,8 +105,7 @@ DATABASES = {
         'PORT': init_config.DB_PORT,
         'TEST': init_config.DB_TEST,
     }
-}  
-    
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators

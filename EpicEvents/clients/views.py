@@ -12,9 +12,9 @@ from .models import Client
 from .serializers import ClientSerializer
 
 
-class ClientViewset(GetPermissionMixin, viewsets.ModelViewSet): 
+class ClientViewset(GetPermissionMixin, viewsets.ModelViewSet):
     __basic_fields = ('last_name', 'email')
-    queryset = Client.objects.all()    
+    queryset = Client.objects.all()
     serializer_class = ClientSerializer
     filter_backends = [filters.DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ClientFilter
@@ -25,7 +25,7 @@ class ClientViewset(GetPermissionMixin, viewsets.ModelViewSet):
         obj = get_object_or_404(self.queryset, id=self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
-    
+
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -35,7 +35,7 @@ class ClientViewset(GetPermissionMixin, viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(sales_contact_id=self.request.user)
-        
+
     def update(self, request, pk=None):
         client = self.get_object()
         serializer = self.serializer_class(client, data=request.data)
@@ -48,4 +48,3 @@ class ClientViewset(GetPermissionMixin, viewsets.ModelViewSet):
         client = self.get_object()
         client.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
