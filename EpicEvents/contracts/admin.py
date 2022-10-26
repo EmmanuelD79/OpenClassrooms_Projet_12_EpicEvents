@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Contract
+from contracts.models import Contract
 from authentication.admin import crm_site
 from clients.models import Client
 
