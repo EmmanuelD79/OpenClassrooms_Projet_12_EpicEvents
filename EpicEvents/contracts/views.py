@@ -25,15 +25,15 @@ class ContratViewset(GetPermissionMixin, viewsets.ModelViewSet):
         return obj
 
     def create(self, request):
-        serializer = ContractSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None):
-        client = self.get_object()
-        serializer = ContractSerializer(client, data=request.data)
+        contract = self.get_object()
+        serializer = self.serializer_class(contract, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

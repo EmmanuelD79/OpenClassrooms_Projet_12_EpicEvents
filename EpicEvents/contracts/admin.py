@@ -34,14 +34,16 @@ class ContractAdmin(admin.ModelAdmin):
     company_name.admin_order_field = "client_id__company_name"
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-
-        if not request.user.is_superuser:
-            add_view = request.path.split("/")[-2]
-            if db_field.name == "client_id" and add_view == 'add':
+        
+        add_view = request.path.split("/")[-2]
+        if db_field.name == "client_id" and add_view == 'add':
+            if not request.user.is_superuser:
                 kwargs["queryset"] = Client.objects.filter(
-                    sales_contact_id=request.user) | Client.objects.filter(
+                    sales_contact_id=request.user).filter(status__status="Client") | Client.objects.filter(
                         contract__event__support_contact_id=request.user
-                        )
+                        ).filter(status="Client")
+            else:
+                kwargs["queryset"] = Client.objects.filter(status="Client")
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
